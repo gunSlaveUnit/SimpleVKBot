@@ -24,12 +24,15 @@ class VKBot:
     def run(self):
         try:
             for event in self._vk_longpoller.listen():
-                if event.type == VkBotEventType.MESSAGE_NEW:
-                    self._vk_api.messages.send(user_id=event.message['from_id'],
-                                               message=event.message['text'],
-                                               random_id=randint(0, VKBot._INFINITE))
+                self._handle_events(event=event)
         except Exception as ex:
             print(ex, ex.args)
+
+    def _handle_events(self, event):
+        if event.type == VkBotEventType.MESSAGE_NEW:
+            self._vk_api.messages.send(user_id=event.message['from_id'],
+                                       message=event.message['text'],
+                                       random_id=randint(0, VKBot._INFINITE))
 
 
 if __name__ == '__main__':
