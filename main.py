@@ -11,7 +11,7 @@ from id import group_id
 
 
 class VKBot:
-    _INFINITE = 2**33
+    _INFINITE = 2**32
 
     def __init__(self, group_id=None, group_access_key=None):
         self._id = group_id
