@@ -6,6 +6,9 @@ from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 
 log = logging.getLogger('bot')
 stream_handler = logging.StreamHandler()
+stream_handler.setFormatter(logging.Formatter('%(asctime)s '
+                                              '%(levelname)s'
+                                              '%(message)s'))
 log.addHandler(stream_handler)
 log.setLevel(logging.DEBUG)
 stream_handler.setLevel(logging.DEBUG)
@@ -36,7 +39,7 @@ class VKBot:
                                        message=event.message['text'],
                                        random_id=randint(0, VKBot._INFINITE))
 
-            log.debug(f'Message: {event.message["text"]}')
+            log.debug(f' Message: {event.message["text"]}')
         else:
             # log.debug(f'Message of an unprocessed type: {event.type}')
-            log.debug(f'Message of an unprocessed type: {event.type}')
+            log.debug(f' Message of an unprocessed type: {event.type}')
