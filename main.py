@@ -2,7 +2,6 @@
 # -*- coding: utf8 -*-
 
 from VKBot import VKBot
-
 from key import group_key
 from id import group_id
 

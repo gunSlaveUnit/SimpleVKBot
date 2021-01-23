@@ -1,7 +1,14 @@
 from random import randint
+import logging
 
 import vk_api
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
+
+log = logging.getLogger('bot')
+stream_handler = logging.StreamHandler()
+log.addHandler(stream_handler)
+log.setLevel(logging.DEBUG)
+stream_handler.setLevel(logging.DEBUG)
 
 
 class VKBot:
@@ -21,10 +28,15 @@ class VKBot:
                 self._handle_events(event=event)
         # TODO: write exceptions
         except Exception as ex:
-            print(ex, ex.args)
+            log.debug(f'Error in event handling: {ex} - {ex.args}')
 
     def _handle_events(self, event):
         if event.type == VkBotEventType.MESSAGE_NEW:
             self._vk_api.messages.send(user_id=event.message['from_id'],
                                        message=event.message['text'],
                                        random_id=randint(0, VKBot._INFINITE))
+
+            log.debug(f'Message: {event.message["text"]}')
+        else:
+            # log.debug(f'Message of an unprocessed type: {event.type}')
+            log.debug(f'Message of an unprocessed type: {event.type}')
