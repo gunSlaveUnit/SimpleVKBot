@@ -13,6 +13,10 @@ class VKBot:
         self._id = group_id
         self._token = group_access_key
 
+        self._vk = vk_api.VkApi(token=self._token)
+        self.vk_api = self._vk.get_api()
+        self._vk_longpoller = VkBotLongPoll(vk=self._vk, group_id=self._id)
+
     def run(self):
         pass
 
