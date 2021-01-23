@@ -15,7 +15,7 @@ stream_handler.setLevel(logging.DEBUG)
 
 
 class VKBot:
-    _INFINITE = 2**32
+    _INFINITE_TO_GENERATE_UNIQUE_MESSAGE_NUMBER = 2 ** 32
 
     def __init__(self, group_id=None, group_access_key=None):
         self._id = group_id
@@ -37,7 +37,7 @@ class VKBot:
         if event.type == VkBotEventType.MESSAGE_NEW:
             self._vk_api.messages.send(user_id=event.message['from_id'],
                                        message=event.message['text'],
-                                       random_id=randint(0, VKBot._INFINITE))
+                                       random_id=randint(0, VKBot._INFINITE_TO_GENERATE_UNIQUE_MESSAGE_NUMBER))
 
             log.debug(f' Message: {event.message["text"]}')
         else:
