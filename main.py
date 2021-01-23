@@ -13,6 +13,10 @@ class VKBot:
         self._id = group_id
         self._token = group_access_key
 
+    def run(self):
+        pass
+
 
 if __name__ == '__main__':
-    pass
+    bot = VKBot(group_id=group_id, group_access_key=group_key)
+    bot.run()
