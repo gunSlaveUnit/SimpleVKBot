@@ -8,7 +8,7 @@ stream_handler = logging.StreamHandler()
 stream_handler.setFormatter(logging.Formatter('%(asctime)s '
                                               '%(levelname)s'
                                               '%(message)s'))
-stream_handler.setLevel(logging.DEBUG)
+stream_handler.setLevel(logging.INFO)
 
 file_handler = logging.FileHandler(filename='bot.log', mode='a', encoding='utf8')
 file_handler.setFormatter(logging.Formatter('%(asctime)s '
