@@ -55,4 +55,4 @@ class VKBot:
             log.debug(f' Message: {event.message["text"]}')
         else:
             # log.debug(f'Message of an unprocessed type: {event.type}')
-            log.debug(f' Message of an unprocessed type: {event.type}')
+            log.info(f' Message of an unprocessed type: {event.type}')
