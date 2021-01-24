@@ -44,9 +44,11 @@ class VKBot:
 
     def _handle_events(self, event):
         if event.type == VkBotEventType.MESSAGE_NEW:
-            self._vk_api.messages.send(user_id=event.message['from_id'],
-                                       message=event.message['text'],
-                                       random_id=randint(0, VKBot._INFINITE_TO_GENERATE_UNIQUE_MESSAGE_NUMBER))
+            self._vk_api.messages.send(
+                user_id=event.message['from_id'],
+                message=event.message['text'],
+                random_id=randint(0, VKBot._INFINITE_TO_GENERATE_UNIQUE_MESSAGE_NUMBER)
+            )
 
             log.debug(f' Message: {event.message["text"]}')
         else:
