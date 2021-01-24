@@ -31,7 +31,7 @@ class VKBot:
                 self._handle_events(event=event)
         # TODO: write exceptions
         except Exception as ex:
-            log.debug(f'Error in event handling: {ex} - {ex.args}')
+            log.exception(f'Error in event handling: {ex} - {ex.args}')
 
     def _handle_events(self, event):
         if event.type == VkBotEventType.MESSAGE_NEW:
