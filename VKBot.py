@@ -4,14 +4,23 @@ import logging
 import vk_api
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 
-log = logging.getLogger('bot')
 stream_handler = logging.StreamHandler()
 stream_handler.setFormatter(logging.Formatter('%(asctime)s '
                                               '%(levelname)s'
                                               '%(message)s'))
-log.addHandler(stream_handler)
-log.setLevel(logging.DEBUG)
 stream_handler.setLevel(logging.DEBUG)
+
+file_handler = logging.FileHandler(filename='bot.log', mode='a', encoding='utf8')
+file_handler.setFormatter(logging.Formatter('%(asctime)s '
+                                            '%(levelname)s'
+                                            '%(message)s'))
+file_handler.setLevel(logging.DEBUG)
+
+log = logging.getLogger('bot')
+log.setLevel(logging.DEBUG)
+log.addHandler(stream_handler)
+log.addHandler(file_handler)
+
 
 
 class VKBot:
