@@ -22,9 +22,18 @@ def configure_logging():
 
 
 class VKBot:
+    """
+    Echo bot class for vk.com
+    Use Python 3.9.0
+    Use vk_api 11.9.1
+    """
     _INFINITE_TO_GENERATE_UNIQUE_MESSAGE_NUMBER = 2 ** 32
 
     def __init__(self, group_id=None, group_access_key=None):
+        """
+        :param group_id: community id from vk.com
+        :param group_access_key: unique secret token to access your community
+        """
         self._id = group_id
         self._token = group_access_key
 
@@ -35,6 +44,10 @@ class VKBot:
         configure_logging()
 
     def run(self):
+        """
+        Bot launch
+        :return: None
+        """
         try:
             for event in self._vk_longpoller.listen():
                 self._handle_events(event=event)
@@ -43,6 +56,11 @@ class VKBot:
             log.exception(f'Error in event handling: {ex} - {ex.args}')
 
     def _handle_events(self, event):
+        """
+        Processing an event depending on its type
+        :param event: object VkBotEvent
+        :return: None
+        """
         if event.type == VkBotEventType.MESSAGE_NEW:
             self._vk_api.messages.send(
                 user_id=event.message['from_id'],
