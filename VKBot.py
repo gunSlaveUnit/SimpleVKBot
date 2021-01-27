@@ -58,7 +58,7 @@ class VKBot:
     def _handle_events(self, event):
         """
         Processing an event depending on its type
-        :param event: object VkBotEvent
+        :param event: VkBotMessageEvent object
         :return: None
         """
         if event.type == VkBotEventType.MESSAGE_NEW:
