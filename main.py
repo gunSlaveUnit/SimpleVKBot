@@ -2,9 +2,8 @@
 # -*- coding: utf8 -*-
 
 from VKBot import VKBot
-from key import group_key
-from id import group_id
+import settings
 
 if __name__ == '__main__':
-    bot = VKBot(group_id=group_id, group_access_key=group_key)
+    bot = VKBot(group_id=settings.group_id, group_access_key=settings.group_key)
     bot.run()
