@@ -1,2 +1,2 @@
-group_id = 0
-group_key = ''
+ID = 0
+TOKEN = ''
