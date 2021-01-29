@@ -1,3 +1,6 @@
+#! usr/bin/env python3
+# -*- coding: utf8 -*-
+
 from random import randint
 import logging
 
@@ -26,7 +29,7 @@ class VKBot:
     Registration Bot for conference.
     For vk.com.
 
-    Bot supports questions about date, place and script of registration:
+    Bot supports questions about date, place and scenario of registration:
     - Ask name
     - Ask email
     - Say about successful registration.
