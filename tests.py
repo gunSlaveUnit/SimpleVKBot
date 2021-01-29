@@ -28,7 +28,7 @@ class TestBot(TestCase):
                 assert bot._handle_events.call_count == count_call_handle_events
 
     def test_handle_events(self):
-        RAW_EVENT = {
+        raw_event_for_test = {
             'type': 'message_new',
             'object': {
                 'message': {
@@ -47,7 +47,7 @@ class TestBot(TestCase):
             'event_id': 'edd6b907c6b27c817e03bc998c09724c1c8fb1db'
         }
 
-        event = VkBotMessageEvent(raw=RAW_EVENT)
+        event = VkBotMessageEvent(raw=raw_event_for_test)
         send_mock = Mock()
         with patch('VKBot.vk_api.VkApi'):
             with patch('VKBot.VkBotLongPoll'):
@@ -57,8 +57,8 @@ class TestBot(TestCase):
 
                 bot._handle_events(event)
                 send_mock.assert_called_once_with(
-                    user_id=RAW_EVENT['object']['message']['from_id'],
-                    message=RAW_EVENT['object']['message']['text'],
+                    user_id=raw_event_for_test['object']['message']['from_id'],
+                    message=raw_event_for_test['object']['message']['text'],
                     random_id=ANY
                 )
 
