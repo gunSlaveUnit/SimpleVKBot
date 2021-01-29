@@ -24,7 +24,7 @@ class TestBot(TestCase):
 
                 bot._handle_events.assert_called()
                 # TODO: assert below is bad
-                # bot._handle_events.assert_called_with(object_to_pass_to_handle_events)
+                # bot._handle_events.assert_any_call(object_to_pass_to_handle_events)
                 assert bot._handle_events.call_count == count_call_handle_events
 
     def test_handle_events(self):

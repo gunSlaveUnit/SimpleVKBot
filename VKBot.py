@@ -23,7 +23,15 @@ def configure_logging():
 
 class VKBot:
     """
-    Echo bot class for vk.com
+    Registration Bot for conference.
+    For vk.com.
+
+    Bot supports questions about date, place and script of registration:
+    - Ask name
+    - Ask email
+    - Say about successful registration.
+    If the step is not complete, ask a clarifying question.
+
     Use Python 3.9.0
     Use vk_api 11.9.1
     """
