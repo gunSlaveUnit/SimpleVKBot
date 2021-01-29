@@ -29,13 +29,13 @@ SCENARIOS = {
             'step1': {
                 'text': 'Для регистрации введите Ваше имя. Оно будет на Вашем бейджике.',
                 'failure_text': 'Имя должно состоять из 3-30 букв и содержать пробел.',
-                'handler': 'handle_name',
+                'handler': 'handler_name',
                 'next_step': 'step2'
             },
             'step2': {
                 'text': 'Введите Ваш email. На него мы отправим билет.',
                 'failure_text': 'Введенный email некорректен, попробуйте ещё раз.',
-                'handler': 'handle_email',
+                'handler': 'handler_email',
                 'next_step': 'step3'
             },
             'step3': {
