@@ -51,6 +51,7 @@ class VKBot:
         self._vk = vk_api.VkApi(token=self._token)
         self._vk_api = self._vk.get_api()
         self._vk_longpoller = VkBotLongPoll(vk=self._vk, group_id=self._id)
+        self.user_states = dict()  # user_id: user_state
 
         configure_logging()
 
