@@ -79,33 +79,34 @@ class VKBot:
         """
         if event.type != VkBotEventType.MESSAGE_NEW:
             log.info(f' Message of an unprocessed type: {event.type}')
+            return
+        user_id = event.message['from_id']
+        text = event.message['text']
+        if user_id in self._user_states:
+            text_to_send = self._continue_scenario(user_id, text)
         else:
-            user_id = event.message['from_id']
-            text = event.message['text']
-            if user_id in self._user_states:
-                text_to_send = self._continue_scenario(user_id, text)
-            else:
-                # search intent
-                for intent in BotBehaviour.INTENTS:
-                    if any(token in text for token in intent['tokens']):
-                        # run intent
-                        if intent['answer']:
-                            text_to_send = intent['answer']
-                        else:
-                            self._start_scenario(user_id, intent['scenario'])
-                        break
+            # search intent
+            for intent in BotBehaviour.INTENTS:
+                log.debug(f'User gets {intent}')
+                if any(token in text for token in intent['tokens']):
+                    # run intent
+                    if intent['answer']:
+                        text_to_send = intent['answer']
                     else:
-                        text_to_send = BotBehaviour.DEFAULT_ANSWER
+                        text_to_send = self._start_scenario(user_id, intent['scenario'])
+                    break
+                else:
+                    text_to_send = BotBehaviour.DEFAULT_ANSWER
 
-            self._vk_api.messages.send(
-                user_id=user_id,
-                message=text_to_send,
-                random_id=randint(0, VKBot._INFINITE_TO_GENERATE_UNIQUE_MESSAGE_NUMBER)
-            )
+        self._vk_api.messages.send(
+            user_id=user_id,
+            message=text_to_send,
+            random_id=randint(0, VKBot._INFINITE_TO_GENERATE_UNIQUE_MESSAGE_NUMBER)
+        )
 
     def _continue_scenario(self, user_id, text):
         # continue a scenario
-        state = self._user_states['user_id']
+        state = self._user_states[user_id]
         steps = BotBehaviour.SCENARIOS[state.scenario]['steps']
         step = steps[state.step]
         handler = getattr(HandlersForScenarios, step['handler'])
@@ -118,6 +119,7 @@ class VKBot:
                 state.step = step['next_step']
             else:
                 # finish scenario
+                log.info('Registered: {name} {email}'.format(**state.context))
                 self._user_states.pop(user_id)
         else:
             # retry current step

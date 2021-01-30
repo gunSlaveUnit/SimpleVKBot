@@ -16,7 +16,7 @@ INTENTS = [
     },
     {
         'name': 'Регистрация',
-        'tokens': ('регист', 'добав'),
+        'tokens': ('регистрация', 'добавь', 'зарегистрируй'),
         'scenario': 'registration',
         'answer': None
     }
@@ -39,8 +39,8 @@ SCENARIOS = {
                 'next_step': 'step3'
             },
             'step3': {
-                'text': 'Благодарим Вас за регистрацию, {name}! Мы отправили билет на Ваш email,'
-                        'распечатайте его',
+                'text': 'Благодарим Вас за регистрацию, {name}! Мы отправили билет на Ваш email, '
+                        'распечатайте его!',
                 'failure_text': None,
                 'handler': None,
                 'next_step': None
