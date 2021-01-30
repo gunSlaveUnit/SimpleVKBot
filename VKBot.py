@@ -1,11 +1,15 @@
 #! usr/bin/env python3
 # -*- coding: utf8 -*-
 
-from random import randint
 import logging
+from random import randint
 
 import vk_api
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
+
+import BotBehaviour
+import HandlersForScenarios
+import UserState
 
 
 def configure_logging():
@@ -51,7 +55,7 @@ class VKBot:
         self._vk = vk_api.VkApi(token=self._token)
         self._vk_api = self._vk.get_api()
         self._vk_longpoller = VkBotLongPoll(vk=self._vk, group_id=self._id)
-        self.user_states = dict()  # user_id: user_state
+        self._user_states = dict()  # user_id: user_state
 
         configure_logging()
 
@@ -73,14 +77,59 @@ class VKBot:
         :param event: VkBotMessageEvent object
         :return: None
         """
-        if event.type == VkBotEventType.MESSAGE_NEW:
+        if event.type != VkBotEventType.MESSAGE_NEW:
+            log.info(f' Message of an unprocessed type: {event.type}')
+        else:
+            user_id = event.message['from_id']
+            text = event.message['text']
+            if user_id in self._user_states:
+                text_to_send = self._continue_scenario(user_id, text)
+            else:
+                # search intent
+                for intent in BotBehaviour.INTENTS:
+                    if any(token in text for token in intent['tokens']):
+                        # run intent
+                        if intent['answer']:
+                            text_to_send = intent['answer']
+                        else:
+                            self._start_scenario(user_id, intent['scenario'])
+                        break
+                    else:
+                        text_to_send = BotBehaviour.DEFAULT_ANSWER
+
             self._vk_api.messages.send(
-                user_id=event.message['from_id'],
-                message=event.message['text'],
+                user_id=user_id,
+                message=text_to_send,
                 random_id=randint(0, VKBot._INFINITE_TO_GENERATE_UNIQUE_MESSAGE_NUMBER)
             )
 
-            log.debug(f' Message: {event.message["text"]}')
+    def _continue_scenario(self, user_id, text):
+        # continue a scenario
+        state = self._user_states['user_id']
+        steps = BotBehaviour.SCENARIOS[state.scenario]['steps']
+        step = steps[state.step]
+        handler = getattr(HandlersForScenarios, step['handler'])
+        if handler(text=text, context=state.context):
+            # next step
+            next_step = steps[step['next_step']]
+            text_to_send = next_step['text'].format(**state.context)
+            if next_step['next_step']:
+                # switch to next step
+                state.step = step['next_step']
+            else:
+                # finish scenario
+                self._user_states.pop(user_id)
         else:
-            # log.debug(f'Message of an unprocessed type: {event.type}')
-            log.info(f' Message of an unprocessed type: {event.type}')
+            # retry current step
+            text_to_send = step['failure_text'].format(**state.context)
+
+        return text_to_send
+
+    def _start_scenario(self, user_id, scenario_name):
+        scenario = BotBehaviour.SCENARIOS[scenario_name]
+        first_step = scenario['first_step']
+        step = scenario['steps'][first_step]
+        text_to_send = step['text']
+        self._user_states[user_id] = UserState.UserState(scenario_name, first_step)
+
+        return text_to_send

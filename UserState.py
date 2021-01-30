@@ -5,7 +5,7 @@ class UserState:
     """
     User state within a script.
     """
-    def __init__(self, scenario, step, context):
+    def __init__(self, scenario, step, context=None):
         self.scenario = scenario
         self.step = step
-        self.context = context
+        self.context = context or {}
