@@ -5,11 +5,12 @@ import logging
 from random import randint
 
 import vk_api
+from pony.orm import db_session
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 
 import BotBehaviour
 import HandlersForScenarios
-import UserState
+import models
 
 
 def configure_logging():
@@ -55,7 +56,6 @@ class VKBot:
         self._vk = vk_api.VkApi(token=self._token)
         self._vk_api = self._vk.get_api()
         self._vk_longpoller = VkBotLongPoll(vk=self._vk, group_id=self._id)
-        self._user_states = dict()  # user_id: user_state
 
         configure_logging()
 
@@ -71,6 +71,7 @@ class VKBot:
         except Exception as ex:
             log.exception(f'Error in event handling: {ex} - {ex.args}')
 
+    @db_session
     def _handle_events(self, event):
         """
         Processing an event depending on its type
@@ -82,8 +83,11 @@ class VKBot:
             return
         user_id = event.message['from_id']
         text = event.message['text']
-        if user_id in self._user_states:
-            text_to_send = self._continue_scenario(user_id, text)
+
+        state = models.UserState.get(user_id=str(user_id))
+
+        if state is not None:
+            text_to_send = self._continue_scenario(text, state)
         else:
             # search intent
             for intent in BotBehaviour.INTENTS:
@@ -104,9 +108,16 @@ class VKBot:
             random_id=randint(0, VKBot._INFINITE_TO_GENERATE_UNIQUE_MESSAGE_NUMBER)
         )
 
-    def _continue_scenario(self, user_id, text):
-        # continue a scenario
-        state = self._user_states[user_id]
+    def _start_scenario(self, user_id, scenario_name):
+        scenario = BotBehaviour.SCENARIOS[scenario_name]
+        first_step = scenario['first_step']
+        step = scenario['steps'][first_step]
+        text_to_send = step['text']
+        models.UserState(user_id=str(user_id), scenario=scenario_name, step=first_step, context={})
+
+        return text_to_send
+
+    def _continue_scenario(self, text, state):
         steps = BotBehaviour.SCENARIOS[state.scenario]['steps']
         step = steps[state.step]
         handler = getattr(HandlersForScenarios, step['handler'])
@@ -120,18 +131,10 @@ class VKBot:
             else:
                 # finish scenario
                 log.info('Registered: {name} {email}'.format(**state.context))
-                self._user_states.pop(user_id)
+                models.Registration(name=state.context['name'], email=state.context['email'])
+                state.delete()
         else:
             # retry current step
             text_to_send = step['failure_text'].format(**state.context)
-
-        return text_to_send
-
-    def _start_scenario(self, user_id, scenario_name):
-        scenario = BotBehaviour.SCENARIOS[scenario_name]
-        first_step = scenario['first_step']
-        step = scenario['steps'][first_step]
-        text_to_send = step['text']
-        self._user_states[user_id] = UserState.UserState(scenario_name, first_step)
 
         return text_to_send
