@@ -41,6 +41,7 @@ SCENARIOS = {
             'step3': {
                 'text': 'Благодарим Вас за регистрацию, {name}! Мы отправили билет на Ваш email, '
                         'распечатайте его!',
+                'image': 'handler_generate_ticket',
                 'failure_text': None,
                 'handler': None,
                 'next_step': None

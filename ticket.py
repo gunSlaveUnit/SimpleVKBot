@@ -1,6 +1,8 @@
 # !usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import io
+
 from PIL import Image, ImageDraw, ImageFont
 
 TEMPLATE_PATH = 'ticket_template.png'
@@ -21,8 +23,8 @@ def generate_ticket(user_name='DefaultName', user_email='DefaultEmail'):
     draw.text(NAME_OFFSET, user_name, font=font, fill=BLACK_COLOR_FONT)
     draw.text(EMAIL_OFFSET, user_email, font=font, fill=BLACK_COLOR_FONT)
 
-    template_ticket.show()
+    temp_file = io.BytesIO()
+    template_ticket.save(temp_file, 'png')
+    temp_file.seek(0)
 
-
-if __name__ == '__main__':
-    generate_ticket()
+    return temp_file

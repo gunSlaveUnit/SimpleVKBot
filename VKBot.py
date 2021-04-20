@@ -3,6 +3,7 @@
 
 import logging
 from random import randint
+import requests
 
 import vk_api
 from pony.orm import db_session
@@ -87,7 +88,7 @@ class VKBot:
         state = models.UserState.get(user_id=str(user_id))
 
         if state is not None:
-            text_to_send = self._continue_scenario(text, state)
+            self._continue_scenario(text, state, user_id)
         else:
             # search intent
             for intent in BotBehaviour.INTENTS:
@@ -95,36 +96,58 @@ class VKBot:
                 if any(token in text.lower() for token in intent['tokens']):
                     # run intent
                     if intent['answer']:
-                        text_to_send = intent['answer']
+                        self.send_text(user_id, intent['answer'])
                     else:
-                        text_to_send = self._start_scenario(user_id, intent['scenario'])
+                        self._start_scenario(user_id, intent['scenario'], text)
                     break
-                else:
-                    text_to_send = BotBehaviour.DEFAULT_ANSWER
+            else:
+                self.send_text(user_id, BotBehaviour.DEFAULT_ANSWER)
 
+    def send_text(self, user_id, text):
         self._vk_api.messages.send(
             user_id=user_id,
-            message=text_to_send,
+            message=text,
             random_id=randint(0, VKBot._INFINITE_TO_GENERATE_UNIQUE_MESSAGE_NUMBER)
         )
 
-    def _start_scenario(self, user_id, scenario_name):
+    def send_image(self, image, user_id):
+        upload_url = self._vk_api.photos.getMessagesUploadServer()['upload_url']
+        upload_data = requests.post(url=upload_url, files={'photo': ('image.png', image, 'image/png')}).json()
+        image_data = self._vk_api.photos.saveMessagesPhoto(**upload_data)
+
+        owner_id = image_data[0]['owner_id']
+        media_id = image_data[0]['id']
+        attachment = f'photo{owner_id}_{media_id}'
+
+        self._vk_api.messages.send(
+            user_id=user_id,
+            attachment=attachment,
+            random_id=randint(0, VKBot._INFINITE_TO_GENERATE_UNIQUE_MESSAGE_NUMBER)
+        )
+
+    def send_step(self, step, user_id, text, context):
+        if 'text' in step:
+            self.send_text(user_id, step['text'].format(**context))
+        if 'image' in step:
+            handler = getattr(HandlersForScenarios, step['image'])
+            image = handler(text, context)
+            self.send_image(image, user_id)
+
+    def _start_scenario(self, user_id, scenario_name, text):
         scenario = BotBehaviour.SCENARIOS[scenario_name]
         first_step = scenario['first_step']
         step = scenario['steps'][first_step]
-        text_to_send = step['text']
+        self.send_step(step, user_id, text, context={})
         models.UserState(user_id=str(user_id), scenario=scenario_name, step=first_step, context={})
 
-        return text_to_send
-
-    def _continue_scenario(self, text, state):
+    def _continue_scenario(self, text, state, user_id):
         steps = BotBehaviour.SCENARIOS[state.scenario]['steps']
         step = steps[state.step]
         handler = getattr(HandlersForScenarios, step['handler'])
         if handler(text=text, context=state.context):
             # next step
             next_step = steps[step['next_step']]
-            text_to_send = next_step['text'].format(**state.context)
+            self.send_step(next_step, user_id, text, state.context)
             if next_step['next_step']:
                 # switch to next step
                 state.step = step['next_step']
@@ -136,5 +159,4 @@ class VKBot:
         else:
             # retry current step
             text_to_send = step['failure_text'].format(**state.context)
-
-        return text_to_send
+            self.send_text(user_id, text_to_send)
