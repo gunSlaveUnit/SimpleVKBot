@@ -1,3 +1,3 @@
 # SimpleVKBot
 
-![utility_logo](template_ticket.png)
+![utility_logo](ticket_template.png)
