@@ -3,8 +3,8 @@ chardet==4.0.0
 coverage==5.4
 idna==2.10
 Pillow==8.2.0
-pony==0.7.14
-psycopg2==2.8.6
+pony==0.7.16
+psycopg2-binary==2.9.3
 requests==2.25.1
 six==1.15.0
 urllib3==1.26.2
